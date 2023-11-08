@@ -31,9 +31,10 @@ divline = drawline("Color", "blue");
 ep = divline.Position;
 x1 = ep(1,1); y1 = ep(1,2); x2 = ep(2,1); y2 = ep(2,2);
 b2r = atan2d((y2-y1),(x2-x1));
+angle = b2r-90;
 
-r_datacat = imrotate(datacat, b2r-90, "crop");
-r_data1 = imrotate(data1, b2r-90, "crop");
+r_datacat = imrotate(datacat, angle, "crop");
+r_data1 = imrotate(data1, angle, "crop");
 [rows, columns] = size(r_datacat);
 
 
@@ -90,7 +91,7 @@ y = [y Ynew];
 divplane = [divplane divx];
 f_width = [f_width width];
 end
-save(fileName, "listOfFileNames", "coords", "divplane", "x", "y", "f_width");
+save(fileName, "listOfFileNames", "coords", "divplane", "x", "y", "f_width", "angle");
 close all;
 
 %% Plotting Membrane Intensity by Cell
