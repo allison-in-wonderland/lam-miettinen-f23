@@ -1,4 +1,4 @@
-# Data Analysis Pipeline for Cell Membrane Intensity Analysis
+# Data Analysis Pipeline for Cell Membrane Intensity
 The functions provided here can be used to manually select a cell membrane, identify pixel intensities along the selected membrane, define the division plane of the cell, and plot membrane intensity as a function of distance to the division plane.
 
 The first file to use is find_files.m, in the format of a function call to find_files(file_format). This function generally allows you to define a directory for use by later scripts and functions.
