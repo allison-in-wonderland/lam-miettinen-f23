@@ -3,14 +3,20 @@ function export(xls_name)
 
     for i = 1:length(filenames)
         load(filenames{i})
+        avg = mean(y);
+        s = std(y);
+        y = (y - avg) ./ s; % Converts to Z-score
+
         % Moving average filter:
         windowWidth = 11; % Whatever you want.
         kernel = ones(windowWidth,1) / windowWidth;
         y = filter(kernel, 1, y);
         
-        ingression = 1 - f_width ./ f_width(1); % Calculating %ingression based on original cell diameter
-        idx = x>-0.1 & x<0.1 ;
-        y0 = max(y .* idx) ; 
+        %ingression = 1 - f_width ./ f_width(1); % Calculating %ingression based on original cell diameter
+        idx = x>-0.1 & x<0.1;
+        v = nonzeros(y .* idx);
+        v = reshape(v, [], size(x,2));
+        y0 = max(v); 
         yp = [];
         
         % Getting intensities at pole, furrow
@@ -19,13 +25,13 @@ function export(xls_name)
             yp = [yp yp_p];
         end
     
-        yp(yp < 0) = 0; % Setting negative intensities equal to 0
-        time = transpose(linspace(1, length(ingression), length(ingression)));
-        dataout = [time, y0.', yp.', f_width.', ingression.'];
-        varnames = {'Frame #','Furrow Intensity','Pole Intensity', 'Furrow Width', '% Ingression'};
+        %yp(yp < 0) = 0; % Setting negative intensities equal to 0
+        %time = transpose(linspace(1, length(ingression), length(ingression)));
+        dataout = [y0.', yp.'];
+        varnames = {'Furrow Intensity','Pole Intensity'};
         T = array2table(dataout);
-        T.Properties.VariableNames(1:5) = varnames;
-        sheetname = erase(filenames{i}, ["_L1210_H2B-GFP_Amine_timelapse-1min30sec", ".mat"]);
+        T.Properties.VariableNames(1:2) = varnames;
+        sheetname = erase(filenames{i}, [".mat"]);
         writetable(T,xls_name,'Sheet',sheetname);
     end
 end
