@@ -1,6 +1,8 @@
 %% Image Processing
+[listOfFolderNames, listOfFileNames, ~] = find_files(".tif");
 prompt = "Please enter a filename to save to (in .mat): ";
 fileName = input(prompt,"s");
+%%
 for i = 1:length(listOfFolderNames)
 addpath(listOfFolderNames{i})
 end
@@ -9,15 +11,15 @@ y = [];
 coords = {};
 divplane = [];
 f_width = [];
+angles = [];
 
 for i = 1:length(listOfFileNames)
 data1 = imread(listOfFileNames{i}, 1); 
-% data2 = imread(listOfFileNames{i}, 2);
+%data2 = imread(listOfFileNames{i}, 2);
 % datacat = imfuse(data1, data2);
 
 info = imfinfo(listOfFileNames{i});
 numberOfPages = length(info);
-data1 = imread(listOfFileNames{i}, 1);
 datacat = data1;
 % for k = 2 : numberOfPages
 %     thisPage = imread(listOfFileNames{i}, k);
@@ -44,7 +46,7 @@ xr = zeros(rows,1) + (divline.Position(1) + divline.Position(2)) / 2;
 yr = linspace(0,rows,rows);
 p = [xr(1) yr(1); xr(end) yr(end)];
 dplane = drawline("Position", p);
-h = drawassisted('Color','cyan', 'LineWidth', 10);
+h = drawfreehand('Color','cyan', 'LineWidth', 10);
 pos = h.Position;
 set(gcf,'WindowKeyPressFcn', @(~,~) set(gcf,'UserData', true));
 waitfor(gcf,'UserData')
@@ -60,7 +62,7 @@ blurrier = ones(howMuchBlur) / howMuchBlur ^ 2;
 blurredImage = imfilter(r_data1, blurrier); 
 [cx,cy,c] = improfile(blurredImage,pos(:,1),pos(:,2));
 c(isnan(c))=0;
-divx = (divline.Position(1) + divline.Position(2)) / 2; % Manually sets division plane
+divx = (dplane.Position(1) + dplane.Position(2)) / 2; % Manually sets division plane
 cx = cx - divx; % Centers the division plane at x = 0
 cx = cx - min(cx);
 range = max(cx) - min(cx); 
@@ -90,29 +92,38 @@ x = [x Xnew];
 y = [y Ynew];
 divplane = [divplane divx];
 f_width = [f_width width];
+angles = [angles angle];
 end
-save(fileName, "listOfFileNames", "coords", "divplane", "x", "y", "f_width", "angle");
+save(fileName, "listOfFileNames", "coords", "divplane", "x", "y", "f_width", "angles");
 close all;
 
+
 %% Plotting Membrane Intensity by Cell
-listOfAnalyses = ["metaphase_no_bg.mat" "anaphase_no_bg.mat" "telophase_no_bg.mat"];
-colors = {[0.9290 0.6940 0.1250], [0.6350 0.0780 0.1840], [0.2 0.5 0.9]};
-names = {"Metaphase", "Anaphase", "Telophase"};
+listOfAnalyses = ["03-02-2024_L1210_H2B-GFP_RedAmine_Filipin-III_Protein.mat" "03-02-2024_L1210_H2B-GFP_RedAmine_Filipin-III_Cholesterol.mat"];
+colors = {[0.9290 0.6940 0.1250], [0.6350 0.0780 0.1840]};
+names = {"Protein", "Cholesterol"};
 figure();
 avgline = [];
 
 for i = 1:length(listOfAnalyses)
 load(listOfAnalyses{i})
+
+% Conversion to Z-Score -----------------------------
+    avg = mean(y);
+    s = std(y);
+    y = (y - avg) ./ s; % Converts to Z-score
+% ---------------------------------------------------
+
 xavg = mean(x, 2);
 yavg = mean(y, 2);
 stdev = std(y, 0, 2);
 maxstd = yavg + stdev;
 minstd = yavg - stdev;
 
-color1 = [colors{i} 0.2]; % Changes the transparency for plotted raw data
-plot(x, y, '-', 'Color', color1);
-hold on;
-
+% color1 = [colors{i} 1]; % Changes the transparency for plotted raw data
+% plot(x, y, '-', 'Color', color1);
+% hold on;
+% 
 color2 = [colors{i} 0.8];
 plot(xavg, yavg, "-", "Color", color2, 'LineWidth', 2);
 hold on;
@@ -124,6 +135,7 @@ end
 
 % Plot-related things that don't vary by experiment
 xlim([-1 1]);
+ylim([-2 4]);
 title("Membrane Intensity by Location");
 xlabel("Distance from Division Plane");
 ylabel("Normalized Membrane Intensity (Z-Score)");

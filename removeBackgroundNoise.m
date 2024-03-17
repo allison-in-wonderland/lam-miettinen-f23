@@ -13,7 +13,7 @@ m = mean2(img(logical(bw)));
 y = y - m;
 
 cd '/Users/allisonlam/Desktop/Work/UROP/Manalis Lab/Membrane Density/data_no_bg';
-save(fileName, "listOfFileNames", "coords", "divplane", "x", "y");
+save(fileName, "listOfFileNames", "coords", "divplane", "x", "y", "angles", "f_width");
 close all;
 clear all;
 cd '/Users/allisonlam/Desktop/Work/UROP/Manalis Lab/Membrane Density';

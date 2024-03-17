@@ -33,5 +33,6 @@ function export(xls_name)
         T.Properties.VariableNames(1:2) = varnames;
         sheetname = erase(filenames{i}, [".mat"]);
         writetable(T,xls_name,'Sheet',sheetname);
+        clear("x", "y", "y0", "yp")
     end
 end
